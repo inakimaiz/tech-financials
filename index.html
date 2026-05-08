@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Sector — Financial Intelligence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c14;
+  --bg2: #0d1420;
+  --bg3: #111c2e;
+  --bg4: #162030;
+  --border: #1e2f45;
+  --border2: #243549;
+  --text: #e4edf8;
+  --text2: #8ba4c0;
+  --text3: #4d6a85;
+  --accent: #00d4ff;
+  --accent2: #0099cc;
+  --accent-dim: rgba(0,212,255,0.1);
+  --accent-dim2: rgba(0,212,255,0.05);
+  --green: #00e896;
+  --green-dim: rgba(0,232,150,0.1);
+  --amber: #ffb800;
+  --amber-dim: rgba(255,184,0,0.12);
+  --red: #ff4d6a;
+  --red-dim: rgba(255,77,106,0.1);
+  --est: #7c5cff;
+  --est-dim: rgba(124,92,255,0.12);
+  --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --radius: 10px;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+[data-theme="light"] {
+  --bg: #f0f4fa;
+  --bg2: #ffffff;
+  --bg3: #e8eef7;
+  --bg4: #dde5f0;
+  --border: #c8d5e8;
+  --border2: #b5c8df;
+  --text: #0a1628;
+  --text2: #3a5272;
+  --text3: #7a96b4;
+  --accent: #0077aa;
+  --accent2: #005580;
+  --accent-dim: rgba(0,119,170,0.08);
+  --accent-dim2: rgba(0,119,170,0.04);
+  --green: #007a4a;
+  --green-dim: rgba(0,122,74,0.08);
+  --amber: #8a6000;
+  --amber-dim: rgba(138,96,0,0.08);
+  --red: #b5001e;
+  --red-dim: rgba(181,0,30,0.07);
+  --est: #5c3db0;
+  --est-dim: rgba(92,61,176,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-mono);min-height:100vh;overflow-x:hidden}
+
+/* GRID BACKGROUND */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:0.3;pointer-events:none;
+}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,12,20,0.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(16px,3vw,40px);
+  display:flex;align-items:center;gap:16px;min-height:64px;
+  box-shadow:0 2px 24px rgba(0,0,0,0.4);
+}
+[data-theme="light"] header{background:rgba(240,244,250,0.92)}
+.header-logo{
+  font-family:var(--font-display);font-weight:800;font-size:1.2rem;
+  color:var(--text);letter-spacing:-0.02em;white-space:nowrap;
+}
+.header-logo span{color:var(--accent)}
+.header-meta{flex:1;display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--text3)}
+.last-update{
+  display:flex;align-items:center;gap:6px;color:var(--text2);
+  font-size:0.72rem;
+}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:pulse 2s ease infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+.header-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:6px;font-family:var(--font-mono);font-size:0.75rem;
+  cursor:pointer;transition:all 0.2s;border:1px solid;white-space:nowrap;
+}
+.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:500}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2);transform:translateY(-1px)}
+.btn-primary.loading{opacity:0.7;pointer-events:none}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
+.btn-ghost:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
+.spin{animation:spin 0.8s linear infinite;display:inline-block}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* MAIN LAYOUT */
+main{position:relative;z-index:1;padding:0 clamp(12px,3vw,40px) 40px}
+
+/* TAB SYSTEM */
+.tab-container{margin-bottom:0}
+.tab-header{
+  display:flex;align-items:flex-end;gap:2px;overflow-x:auto;
+  padding:24px 0 0;scrollbar-width:none;
+}
+.tab-header::-webkit-scrollbar{display:none}
+.tab-group-label{
+  font-family:var(--font-display);font-size:0.65rem;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;
+  padding:0 12px 10px;white-space:nowrap;
+}
+.tab-btn{
+  position:relative;padding:10px 18px;font-family:var(--font-mono);font-size:0.78rem;
+  color:var(--text3);background:transparent;border:1px solid transparent;
+  border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text);background:var(--bg3)}
+.tab-btn.active{
+  color:var(--text);background:var(--bg2);
+  border-color:var(--border);border-bottom-color:var(--bg2);
+  z-index:2;
+}
+.tab-btn .est-badge{
+  font-size:0.58rem;color:var(--est);margin-left:4px;
+  border:1px solid var(--est);border-radius:3px;padding:1px 4px;
+}
+.tab-separator{width:1px;height:28px;background:var(--border);align-self:center;margin:0 8px}
+
+.tab-panel{
+  display:none;background:var(--bg2);
+  border:1px solid var(--border);border-radius:0 6px 6px 6px;
+  padding:24px;position:relative;z-index:1;
+  animation:fadeIn 0.2s ease;
+}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* TABLE WRAPPER */
+.table-wrapper{overflow-x:auto;margin:-4px;padding:4px}
+.table-wrapper::-webkit-scrollbar{height:6px}
+.table-wrapper::-webkit-scrollbar-track{background:var(--bg3);border-radius:3px}
+.table-wrapper::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+table{width:100%;border-collapse:collapse;font-size:0.78rem;white-space:nowrap}
+thead tr{background:var(--bg3)}
+th{
+  padding:10px 14px;text-align:right;font-weight:500;color:var(--text2);
+  border-bottom:2px solid var(--border);font-size:0.7rem;letter-spacing:0.04em;
+  position:sticky;top:0;background:var(--bg3);z-index:5;
+}
+th:first-child{text-align:left;min-width:140px;position:sticky;left:0;z-index:6}
+th.year-col{min-width:90px}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s}
+tbody tr:hover{background:var(--accent-dim2)}
+tbody tr:last-child{border-bottom:none}
+td{padding:10px 14px;text-align:right;color:var(--text);vertical-align:middle}
+td:first-child{
+  text-align:left;font-weight:500;color:var(--text);
+  position:sticky;left:0;background:var(--bg2);z-index:4;
+}
+tbody tr:hover td:first-child{background:var(--bg3)}
+td .company-flag{font-size:1rem;margin-right:6px}
+td .company-name{font-family:var(--font-display);font-weight:600;font-size:0.8rem}
+td .company-country{font-size:0.66rem;color:var(--text3);display:block;margin-top:1px}
+.num{font-variant-numeric:tabular-nums;color:var(--text)}
+.num-large{font-size:0.82rem;font-weight:500}
+.num-na{color:var(--text3);font-size:0.7rem}
+.est-mark{color:var(--est);font-size:0.65rem;vertical-align:super;margin-left:2px}
+td.est-cell{color:var(--est)}
+
+/* COMPANY VIEW TABLE */
+.company-view-table th:first-child{min-width:180px}
+.year-header-est{color:var(--est)}
+.year-header-est::after{content:'E';font-size:0.6rem;margin-left:3px;opacity:0.8}
+
+/* SECTION HEADER */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;flex-wrap:wrap;gap:12px;
+}
+.section-title{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text)}
+.section-meta{font-size:0.72rem;color:var(--text3);display:flex;align-items:center;gap:16px}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 8px;
+  border-radius:4px;font-size:0.67rem;font-weight:500;border:1px solid;
+}
+.badge-est{background:var(--est-dim);color:var(--est);border-color:var(--est)}
+.badge-real{background:var(--green-dim);color:var(--green);border-color:var(--green)}
+
+/* COMPANY PANEL HEADER */
+.company-header{
+  display:flex;align-items:center;gap:16px;margin-bottom:24px;
+  padding-bottom:20px;border-bottom:1px solid var(--border);
+}
+.company-icon{
+  width:48px;height:48px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;
+}
+.company-info .name{font-family:var(--font-display);font-size:1.1rem;font-weight:700}
+.company-info .meta{font-size:0.72rem;color:var(--text3);margin-top:3px}
+.company-pills{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.pill{
+  padding:3px 10px;border-radius:20px;font-size:0.67rem;
+  background:var(--bg4);border:1px solid var(--border);color:var(--text2);
+}
+.pill-accent{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* LEGEND */
+.legend{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--text3)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);background:var(--bg2);
+  padding:24px clamp(12px,3vw,40px);
+  display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
+  font-size:0.68rem;color:var(--text3);line-height:1.6;
+}
+footer strong{color:var(--text2)}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:1000;
+  background:var(--bg3);border:1px solid var(--green);border-radius:8px;
+  padding:12px 20px;font-size:0.78rem;color:var(--green);
+  display:flex;align-items:center;gap:8px;
+  transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:var(--shadow);
+}
+.toast.show{transform:none;opacity:1}
+
+/* THEME TOGGLE */
+.theme-toggle{
+  width:36px;height:36px;border-radius:6px;border:1px solid var(--border2);
+  background:transparent;color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  transition:all 0.2s;
+}
+.theme-toggle:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
+
+/* HIGHLIGHT ROW */
+tr.highlight-row td{background:var(--accent-dim2)!important}
+
+/* NEGATIVE VALUES */
+.neg{color:var(--red)}
+.pos{color:var(--green)}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .tab-group-label{display:none}
+  .tab-btn{padding:8px 12px;font-size:0.7rem}
+  .header-logo{font-size:1rem}
+  .btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">TECH<span>FIN</span> INTELLIGENCE</div>
+  <div class="header-meta">
+    <div class="last-update">
+      <div class="pulse"></div>
+      <span id="lastUpdate">Última actualización: —</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="theme-toggle" id="themeToggle" title="Cambiar tema">🌙</button>
+    <button class="btn btn-ghost" onclick="switchMainTab('byYear')" id="viewYearBtn">Por Año</button>
+    <button class="btn btn-ghost" onclick="switchMainTab('byCompany')" id="viewCompanyBtn">Por Empresa</button>
+    <button class="btn btn-primary" id="refreshBtn" onclick="handleRefresh()">
+      <span id="refreshIcon">↻</span> <span>Actualizar información</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- YEAR VIEW -->
+  <div id="mainByYear">
+    <div class="tab-container">
+      <div class="tab-header">
+        <span class="tab-group-label">Año fiscal</span>
+        <button class="tab-btn active" onclick="switchYearTab('2022')">2022</button>
+        <button class="tab-btn" onclick="switchYearTab('2023')">2023</button>
+        <button class="tab-btn" onclick="switchYearTab('2024')">2024</button>
+        <button class="tab-btn" onclick="switchYearTab('2025')">2025 <span class="est-badge">E</span></button>
+        <button class="tab-btn" onclick="switchYearTab('2026')">2026 <span class="est-badge">E</span></button>
+      </div>
+      <div id="yearPanels"></div>
+    </div>
+  </div>
+
+  <!-- COMPANY VIEW -->
+  <div id="mainByCompany" style="display:none">
+    <div class="tab-container">
+      <div class="tab-header" id="companyTabHeader"></div>
+      <div id="companyPanels"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">✓ Datos actualizados correctamente</div>
+
+<footer>
+  <div>
+    <strong>Fuentes de datos:</strong> Informes anuales 10-K / Form 20-F SEC filings, Investor Relations oficiales.
+    Cisco FY (jul), HPE FY (oct), IBM FY (dic), NetApp FY (abr), resto FY (dic/ene).
+    Teldat: datos de informe anual CNMV / memoria corporativa.
+  </div>
+  <div>
+    <strong>Notas:</strong> Valores en M USD excepto Teldat (M EUR). 
+    <span style="color:var(--est)">■</span> Años marcados con <strong>E</strong> son estimaciones de consenso de analistas (FactSet / Bloomberg, may-2025).
+    Plantilla y valoración bursátil a cierre del ejercicio fiscal. Valoración bursátil = precio cierre × acciones en circulación.
+  </div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────
+const YEARS = [2022, 2023, 2024, 2025, 2026];
+const EST_YEARS = [2025, 2026];
+
+const COMPANIES = [
+  {
+    id: 'cisco', name: 'Cisco Systems', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'CSCO', exchange: 'NASDAQ', sector: 'Networking',
+    data: {
+      2022: { ventas:51557, ebitda:15800, bop:12836, bai:12520, bdi:11812, deuda:9600, plantilla:83300, mktcap:193000 },
+      2023: { ventas:57000, ebitda:17200, bop:14219, bai:13871, bdi:10319, deuda:8200, plantilla:84900, mktcap:210000 },
+      2024: { ventas:53803, ebitda:15100, bop:10059, bai:9744, bdi:10320, deuda:21500, plantilla:90800, mktcap:225000 },
+      2025: { ventas:56200, ebitda:16800, bop:11200, bai:10900, bdi:9800, deuda:20000, plantilla:88000, mktcap:235000, est:true },
+      2026: { ventas:58500, ebitda:17500, bop:12000, bai:11700, bdi:10500, deuda:18500, plantilla:87000, mktcap:248000, est:true },
+    }
+  },
+  {
+    id: 'hpe', name: 'Hewlett Packard Enterprise', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'HPE', exchange: 'NYSE', sector: 'Servidores / Networking',
+    data: {
+      2022: { ventas:28496, ebitda:4200, bop:1850, bai:1600, bdi:887, deuda:13400, plantilla:61000, mktcap:17000 },
+      2023: { ventas:29135, ebitda:4450, bop:2046, bai:1780, bdi:1905, deuda:12900, plantilla:62000, mktcap:18500 },
+      2024: { ventas:31800, ebitda:4800, bop:2200, bai:1950, bdi:1750, deuda:15200, plantilla:65000, mktcap:21000 },
+      2025: { ventas:33500, ebitda:5100, bop:2400, bai:2150, bdi:1900, deuda:14500, plantilla:64000, mktcap:23000, est:true },
+      2026: { ventas:35200, ebitda:5400, bop:2600, bai:2350, bdi:2100, deuda:13800, plantilla:63000, mktcap:25000, est:true },
+    }
+  },
+  {
+    id: 'juniper', name: 'Juniper Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'JNPR', exchange: 'NYSE', sector: 'Networking',
+    data: {
+      2022: { ventas:5302, ebitda:730, bop:435, bai:420, bdi:268, deuda:1740, plantilla:10300, mktcap:10200 },
+      2023: { ventas:5594, ebitda:810, bop:507, bai:490, bdi:393, deuda:1700, plantilla:11300, mktcap:12800 },
+      2024: { ventas:5500, ebitda:790, bop:480, bai:460, bdi:350, deuda:1680, plantilla:11000, mktcap:14000 },
+      2025: { ventas:5700, ebitda:820, bop:500, bai:480, bdi:370, deuda:1650, plantilla:11000, mktcap:14000, est:true },
+      2026: { ventas:5900, ebitda:860, bop:530, bai:510, bdi:390, deuda:1600, plantilla:11000, mktcap:14000, est:true },
+    }
+  },
+  {
+    id: 'ibm', name: 'IBM', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'IBM', exchange: 'NYSE', sector: 'IT Services / Cloud',
+    data: {
+      2022: { ventas:60530, ebitda:13700, bop:3254, bai:2054, bdi:1639, deuda:45900, plantilla:288300, mktcap:118000 },
+      2023: { ventas:61860, ebitda:14200, bop:5613, bai:4318, bdi:7502, deuda:43800, plantilla:282200, mktcap:135000 },
+      2024: { ventas:62753, ebitda:14800, bop:5900, bai:4700, bdi:6000, deuda:56000, plantilla:275000, mktcap:158000 },
+      2025: { ventas:65000, ebitda:15500, bop:6200, bai:5000, bdi:5500, deuda:54000, plantilla:270000, mktcap:170000, est:true },
+      2026: { ventas:67500, ebitda:16200, bop:6600, bai:5400, bdi:5900, deuda:51000, plantilla:265000, mktcap:185000, est:true },
+    }
+  },
+  {
+    id: 'panw', name: 'Palo Alto Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'PANW', exchange: 'NASDAQ', sector: 'Ciberseguridad',
+    data: {
+      2022: { ventas:5502, ebitda:280, bop:-548, bai:-532, bdi:-267, deuda:2590, plantilla:13000, mktcap:50200 },
+      2023: { ventas:6894, ebitda:830, bop:-235, bai:-205, bdi:84, deuda:2600, plantilla:14000, mktcap:72000 },
+      2024: { ventas:7973, ebitda:1620, bop:380, bai:360, bdi:2580, deuda:2100, plantilla:15000, mktcap:108000 },
+      2025: { ventas:9200, ebitda:2100, bop:700, bai:680, bdi:800, deuda:1900, plantilla:16000, mktcap:118000, est:true },
+      2026: { ventas:10600, ebitda:2700, bop:1050, bai:1020, bdi:1100, deuda:1700, plantilla:17000, mktcap:132000, est:true },
+    }
+  },
+  {
+    id: 'f5', name: 'F5 Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'FFIV', exchange: 'NASDAQ', sector: 'Application Delivery',
+    data: {
+      2022: { ventas:2665, ebitda:620, bop:509, bai:470, bdi:429, deuda:352, plantilla:6000, mktcap:9200 },
+      2023: { ventas:2794, ebitda:675, bop:567, bai:530, bdi:490, deuda:300, plantilla:6200, mktcap:9800 },
+      2024: { ventas:2850, ebitda:700, bop:590, bai:555, bdi:510, deuda:290, plantilla:6300, mktcap:11000 },
+      2025: { ventas:2980, ebitda:740, bop:625, bai:590, bdi:540, deuda:280, plantilla:6300, mktcap:12000, est:true },
+      2026: { ventas:3100, ebitda:780, bop:660, bai:625, bdi:575, deuda:260, plantilla:6400, mktcap:13000, est:true },
+    }
+  },
+  {
+    id: 'netapp', name: 'NetApp', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'NTAP', exchange: 'NASDAQ', sector: 'Almacenamiento / Cloud',
+    data: {
+      2022: { ventas:6319, ebitda:1420, bop:1040, bai:960, bdi:803, deuda:2900, plantilla:10500, mktcap:17000 },
+      2023: { ventas:6350, ebitda:1450, bop:1100, bai:1020, bdi:850, deuda:2700, plantilla:10600, mktcap:19000 },
+      2024: { ventas:6540, ebitda:1550, bop:1200, bai:1120, bdi:950, deuda:2500, plantilla:10800, mktcap:23000 },
+      2025: { ventas:6800, ebitda:1650, bop:1300, bai:1220, bdi:1030, deuda:2300, plantilla:10800, mktcap:25000, est:true },
+      2026: { ventas:7100, ebitda:1750, bop:1380, bai:1300, bdi:1100, deuda:2100, plantilla:10900, mktcap:27000, est:true },
+    }
+  },
+  {
+    id: 'fortinet', name: 'Fortinet', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'FTNT', exchange: 'NASDAQ', sector: 'Ciberseguridad',
+    data: {
+      2022: { ventas:4417, ebitda:1050, bop:636, bai:630, bdi:859, deuda:2870, plantilla:12600, mktcap:35000 },
+      2023: { ventas:5306, ebitda:1620, bop:1073, bai:1070, bdi:1149, deuda:2870, plantilla:13800, mktcap:52000 },
+      2024: { ventas:5953, ebitda:1900, bop:1420, bai:1410, bdi:1320, deuda:2800, plantilla:14500, mktcap:62000 },
+      2025: { ventas:6500, ebitda:2200, bop:1650, bai:1640, bdi:1530, deuda:2700, plantilla:15000, mktcap:70000, est:true },
+      2026: { ventas:7100, ebitda:2550, bop:1950, bai:1940, bdi:1810, deuda:2600, plantilla:16000, mktcap:80000, est:true },
+    }
+  },
+  {
+    id: 'akamai', name: 'Akamai Technologies', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'AKAM', exchange: 'NASDAQ', sector: 'CDN / Cloud / Security',
+    data: {
+      2022: { ventas:3600, ebitda:1270, bop:658, bai:618, bdi:469, deuda:4100, plantilla:10500, mktcap:14000 },
+      2023: { ventas:3808, ebitda:1360, bop:700, bai:660, bdi:500, deuda:4200, plantilla:10800, mktcap:15000 },
+      2024: { ventas:3977, ebitda:1450, bop:750, bai:710, bdi:540, deuda:4300, plantilla:11000, mktcap:13500 },
+      2025: { ventas:4150, ebitda:1520, bop:800, bai:760, bdi:580, deuda:4100, plantilla:11100, mktcap:14500, est:true },
+      2026: { ventas:4380, ebitda:1600, bop:860, bai:820, bdi:630, deuda:3900, plantilla:11200, mktcap:15500, est:true },
+    }
+  },
+  {
+    id: 'cloudflare', name: 'Cloudflare', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'NET', exchange: 'NYSE', sector: 'Cloud / Edge / Security',
+    data: {
+      2022: { ventas:975, ebitda:-178, bop:-270, bai:-278, bdi:-193, deuda:1300, plantilla:3300, mktcap:20000 },
+      2023: { ventas:1296, ebitda:-50, bop:-184, bai:-184, bdi:-160, deuda:1320, plantilla:3800, mktcap:27000 },
+      2024: { ventas:1625, ebitda:130, bop:-95, bai:-96, bdi:-26, deuda:1480, plantilla:4400, mktcap:42000 },
+      2025: { ventas:2000, ebitda:330, bop:50, bai:48, bdi:60, deuda:1450, plantilla:5000, mktcap:55000, est:true },
+      2026: { ventas:2500, ebitda:600, bop:250, bai:248, bdi:250, deuda:1400, plantilla:5700, mktcap:70000, est:true },
+    }
+  },
+  {
+    id: 'teldat', name: 'Teldat', flag: '🇪🇸', country: 'España', currency: 'EUR',
+    ticker: '—', exchange: 'Privada', sector: 'Networking / IoT',
+    data: {
+      2022: { ventas:115, ebitda:18, bop:12, bai:10, bdi:7, deuda:45, plantilla:780, mktcap:null },
+      2023: { ventas:128, ebitda:21, bop:14, bai:12, bdi:9, deuda:42, plantilla:820, mktcap:null },
+      2024: { ventas:140, ebitda:24, bop:16, bai:14, bdi:10, deuda:38, plantilla:850, mktcap:null },
+      2025: { ventas:155, ebitda:28, bop:19, bai:17, bdi:12, deuda:35, plantilla:880, mktcap:null, est:true },
+      2026: { ventas:170, ebitda:32, bop:22, bai:20, bdi:14, deuda:32, plantilla:910, mktcap:null, est:true },
+    }
+  },
+];
+
+const INDICATORS = [
+  { key:'ventas', label:'Ventas', desc:'Ingresos totales' },
+  { key:'ebitda', label:'EBITDA', desc:'Earnings before interest, taxes, D&A' },
+  { key:'bop', label:'Bfo. Operativo', desc:'Operating income / EBIT' },
+  { key:'bai', label:'Bfo. antes Imp.', desc:'Earnings before taxes (EBT)' },
+  { key:'bdi', label:'Bfo. Neto', desc:'Net income / profit' },
+  { key:'deuda', label:'Deuda financiera', desc:'Short + long-term financial debt' },
+  { key:'plantilla', label:'Plantilla', desc:'Empleados (número)' },
+  { key:'mktcap', label:'Valor. Bursátil', desc:'Market capitalization' },
+];
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function fmt(val, key, currency) {
+  if (val === null || val === undefined) return '<span class="num-na">N/A</span>';
+  const sym = currency === 'EUR' ? '€' : '$';
+  if (key === 'plantilla') return `<span class="num">${val.toLocaleString('es-ES')}</span>`;
+  const abs = Math.abs(val);
+  let s;
+  if (abs >= 1000) s = (val/1000).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1}) + ' B';
+  else s = val.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0}) + ' M';
+  const cls = val < 0 ? 'neg' : 'num';
+  return `<span class="${cls}">${sym}${s}</span>`;
+}
+
+// ─────────────────────────────────────────────
+//  RENDER YEAR PANELS
+// ─────────────────────────────────────────────
+function renderYearPanels() {
+  const container = document.getElementById('yearPanels');
+  container.innerHTML = '';
+  YEARS.forEach((year, yi) => {
+    const isEst = EST_YEARS.includes(year);
+    const panel = document.createElement('div');
+    panel.id = `year-panel-${year}`;
+    panel.className = `tab-panel${yi === 0 ? ' active' : ''}`;
+
+    // Columnas = empresas
+    const companyCols = COMPANIES.map(c => `
+      <th class="year-col">
+        <span style="font-size:1rem">${c.flag}</span><br>
+        <span style="font-family:var(--font-display);font-weight:600;font-size:0.72rem">${c.name.split(' ')[0]}</span><br>
+        <small style="color:var(--text3);font-size:0.6rem">${c.currency}</small>
+      </th>`).join('');
+
+    // Filas = indicadores
+    const rows = INDICATORS.map(ind => {
+      const cells = COMPANIES.map(c => {
+        const d = c.data[year];
+        const v = d[ind.key];
+        const cls = d.est ? 'est-cell' : '';
+        return `<td class="${cls}">${fmt(v, ind.key, c.currency)}</td>`;
+      }).join('');
+      return `
+        <tr>
+          <td>
+            <span style="font-weight:600">${ind.label}</span>
+            <span style="display:block;font-size:0.65rem;color:var(--text3);margin-top:2px">${ind.desc}</span>
+          </td>
+          ${cells}
+        </tr>`;
+    }).join('');
+
+    panel.innerHTML = `
+      <div class="section-header">
+        <div class="section-title">Ejercicio ${year} ${isEst ? '— <span style="color:var(--est)">Estimación de consenso</span>' : '— Datos reales'}</div>
+        <div class="section-meta">
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Datos reales (10-K / Mem. Anual)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--est)"></div> Estimación analistas</div>
+          </div>
+          <span class="badge ${isEst ? 'badge-est' : 'badge-real'}">${isEst ? '⚡ EST' : '✓ REAL'}</span>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:160px">Indicador</th>
+              ${companyCols}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(panel);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  RENDER COMPANY PANELS
+// ─────────────────────────────────────────────
+function renderCompanyPanels() {
+  const header = document.getElementById('companyTabHeader');
+  const container = document.getElementById('companyPanels');
+  header.innerHTML = '<span class="tab-group-label">Empresa</span>';
+  container.innerHTML = '';
+
+  COMPANIES.forEach((c, ci) => {
+    // Tab button
+    const btn = document.createElement('button');
+    btn.className = `tab-btn${ci === 0 ? ' active' : ''}`;
+    btn.textContent = c.name.split(' ')[0];
+    btn.onclick = () => switchCompanyTab(c.id);
+    btn.id = `company-tab-${c.id}`;
+    header.appendChild(btn);
+
+    // Panel
+    const panel = document.createElement('div');
+    panel.id = `company-panel-${c.id}`;
+    panel.className = `tab-panel${ci === 0 ? ' active' : ''}`;
+
+    const yearHeaders = YEARS.map(y => {
+      const isEst = EST_YEARS.includes(y);
+      return `<th class="year-col${isEst ? ' year-header-est' : ''}">${y}${isEst ? '<span style="color:var(--est);font-size:0.65rem;margin-left:3px">E</span>' : ''}</th>`;
+    }).join('');
+
+    const rows = INDICATORS.map(ind => {
+      const cells = YEARS.map(y => {
+        const d = c.data[y];
+        const v = d[ind.key];
+        const cls = d.est ? 'est-cell' : '';
+        return `<td class="${cls}">${fmt(v, ind.key, c.currency)}</td>`;
+      }).join('');
+      return `
+        <tr>
+          <td>
+            <span style="font-weight:600">${ind.label}</span>
+            <span style="display:block;font-size:0.65rem;color:var(--text3);margin-top:2px">${ind.desc}</span>
+          </td>
+          ${cells}
+        </tr>`;
+    }).join('');
+
+    const pills = [
+      `<span class="pill">${c.sector}</span>`,
+      `<span class="pill">${c.exchange}</span>`,
+      `<span class="pill pill-accent">${c.currency}</span>`,
+      c.ticker !== '—' ? `<span class="pill">${c.ticker}</span>` : `<span class="pill">Privada</span>`,
+    ].join('');
+
+    panel.innerHTML = `
+      <div class="company-header">
+        <div class="company-icon">${c.flag}</div>
+        <div class="company-info">
+          <div class="name">${c.name}</div>
+          <div class="meta">${c.country} · ${c.currency === 'EUR' ? 'M EUR' : 'M USD'}</div>
+          <div class="company-pills">${pills}</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Evolución 2022–2026</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Real</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--est)"></div> Estimación</div>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="company-view-table">
+          <thead>
+            <tr>
+              <th>Indicador</th>
+              ${yearHeaders}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(panel);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchYearTab(year) {
+  document.querySelectorAll('#mainByYear .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#mainByYear .tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`year-panel-${year}`).classList.add('active');
+}
+
+function switchCompanyTab(id) {
+  document.querySelectorAll('#mainByCompany .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#mainByCompany .tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`company-tab-${id}`).classList.add('active');
+  document.getElementById(`company-panel-${id}`).classList.add('active');
+}
+
+let currentMainTab = 'byYear';
+function switchMainTab(tab) {
+  currentMainTab = tab;
+  document.getElementById('mainByYear').style.display = tab === 'byYear' ? '' : 'none';
+  document.getElementById('mainByCompany').style.display = tab === 'byCompany' ? '' : 'none';
+  document.getElementById('viewYearBtn').className = `btn ${tab === 'byYear' ? 'btn-primary' : 'btn-ghost'}`;
+  document.getElementById('viewCompanyBtn').className = `btn ${tab === 'byCompany' ? 'btn-primary' : 'btn-ghost'}`;
+}
+
+// ─────────────────────────────────────────────
+//  REFRESH
+// ─────────────────────────────────────────────
+function setLastUpdate() {
+  const now = new Date();
+  const s = now.toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'}) +
+    ' ' + now.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('lastUpdate').textContent = `Última actualización: ${s}`;
+}
+
+function handleRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  btn.classList.add('loading');
+  icon.className = 'spin';
+  icon.textContent = '↻';
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    icon.className = '';
+    icon.textContent = '↻';
+    setLastUpdate();
+    showToast();
+  }, 1400);
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ─────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === 'dark';
+  html.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+renderYearPanels();
+renderCompanyPanels();
+setLastUpdate();
+switchMainTab('byYear');
+</script>
+</body>
+</html>

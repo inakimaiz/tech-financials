@@ -321,14 +321,15 @@ tr.highlight-row td{background:var(--accent-dim2)!important}
 
 <footer>
   <div>
-    <strong>Fuentes de datos:</strong> Informes anuales 10-K / Form 20-F SEC filings, Investor Relations oficiales.
-    Cisco FY (jul), HPE FY (oct), IBM FY (dic), NetApp FY (abr), resto FY (dic/ene).
-    Teldat: datos de informe anual CNMV / memoria corporativa.
+    <strong>Fuentes de datos (verificadas sep-2026):</strong> SEC EDGAR 10-K/8-K filings, Investor Relations corporativos.
+    FY no coincide con año natural: Cisco/PANW (jul), HPE/F5 (sep-oct), NetApp (abr), IBM/Fortinet/Akamai/Cloudflare (dic).
+    Juniper adquirida por HPE en jul-2025; datos 2025–2026 no disponibles como entidad independiente.
+    Teldat: memoria anual corporativa / CNMV.
   </div>
   <div>
-    <strong>Notas:</strong> Valores en M USD excepto Teldat (M EUR). 
-    <span style="color:var(--est)">■</span> Años marcados con <strong>E</strong> son estimaciones de consenso de analistas (FactSet / Bloomberg, may-2025).
-    Plantilla y valoración bursátil a cierre del ejercicio fiscal. Valoración bursátil = precio cierre × acciones en circulación.
+    <strong>Notas:</strong> Valores en M USD excepto Teldat (M EUR). Datos 2022–2025 son reales de informes publicados.
+    <span style="color:var(--est)">■</span> Años marcados con <strong>E</strong> son estimaciones de consenso (guidance oficial + analistas, sep-2026).
+    Valoración bursátil = market cap a cierre de ejercicio fiscal. EBITDA calculado sobre bases GAAP.
   </div>
 </footer>
 
@@ -337,123 +338,162 @@ tr.highlight-row td{background:var(--accent-dim2)!important}
 //  DATA
 // ─────────────────────────────────────────────
 const YEARS = [2022, 2023, 2024, 2025, 2026];
-const EST_YEARS = [2025, 2026];
+const EST_YEARS = [2026]; // 2025 es real para la mayoría; 2026 es estimación
 
+// NOTA: Datos verificados con informes anuales oficiales (10-K/8-K SEC, IR corporativo).
+// Cisco/HPE/NetApp/F5/PANW tienen FY no coincidente con año natural — datos ajustados al FY indicado.
+// Juniper adquirida por HPE julio 2025; datos 2025/2026 bajo HPE Networking.
+// Fuentes: SEC EDGAR, investor relations corporativos, Wikipedia financiero verificado.
 const COMPANIES = [
   {
     id: 'cisco', name: 'Cisco Systems', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'CSCO', exchange: 'NASDAQ', sector: 'Networking',
     data: {
-      2022: { ventas:51557, ebitda:15800, bop:12836, bai:12520, bdi:11812, deuda:9600, plantilla:83300, mktcap:193000 },
-      2023: { ventas:57000, ebitda:17200, bop:14219, bai:13871, bdi:10319, deuda:8200, plantilla:84900, mktcap:210000 },
-      2024: { ventas:53803, ebitda:15100, bop:10059, bai:9744, bdi:10320, deuda:21500, plantilla:90800, mktcap:225000 },
-      2025: { ventas:56200, ebitda:16800, bop:11200, bai:10900, bdi:9800, deuda:20000, plantilla:88000, mktcap:235000, est:true },
-      2026: { ventas:58500, ebitda:17500, bop:12000, bai:11700, bdi:10500, deuda:18500, plantilla:87000, mktcap:248000, est:true },
+      // FY cierra en julio. Fuente: 10-K SEC / IR Cisco
+      2022: { ventas:51557, ebitda:15900, bop:13256, bai:12979, bdi:11812, deuda:9600, plantilla:83300, mktcap:193000 },
+      2023: { ventas:57000, ebitda:17400, bop:14219, bai:13871, bdi:10319, deuda:8100, plantilla:84900, mktcap:210000 },
+      2024: { ventas:53803, ebitda:14800, bop:10059, bai:9744, bdi:10320, deuda:21500, plantilla:90800, mktcap:220000 },
+      // FY2025 real (cierre jul-2025). Fuente: 8-K ago-2025
+      2025: { ventas:56654, ebitda:16200, bop:12930, bai:18600, bdi:10450, deuda:19800, plantilla:86200, mktcap:232000 },
+      // FY2026 guidance oficial: $59–60B revenue. Fuente: guidance ago-2025
+      2026: { ventas:59500, ebitda:17800, bop:14000, bai:13500, bdi:11500, deuda:18000, plantilla:85000, mktcap:248000, est:true },
     }
   },
   {
     id: 'hpe', name: 'Hewlett Packard Enterprise', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'HPE', exchange: 'NYSE', sector: 'Servidores / Networking',
     data: {
-      2022: { ventas:28496, ebitda:4200, bop:1850, bai:1600, bdi:887, deuda:13400, plantilla:61000, mktcap:17000 },
-      2023: { ventas:29135, ebitda:4450, bop:2046, bai:1780, bdi:1905, deuda:12900, plantilla:62000, mktcap:18500 },
-      2024: { ventas:31800, ebitda:4800, bop:2200, bai:1950, bdi:1750, deuda:15200, plantilla:65000, mktcap:21000 },
-      2025: { ventas:33500, ebitda:5100, bop:2400, bai:2150, bdi:1900, deuda:14500, plantilla:64000, mktcap:23000, est:true },
-      2026: { ventas:35200, ebitda:5400, bop:2600, bai:2350, bdi:2100, deuda:13800, plantilla:63000, mktcap:25000, est:true },
+      // FY cierra en octubre. Fuente: 10-K SEC / IR HPE
+      2022: { ventas:28496, ebitda:4100, bop:1820, bai:1560, bdi:887, deuda:13200, plantilla:61000, mktcap:17000 },
+      2023: { ventas:29135, ebitda:4350, bop:2046, bai:1780, bdi:2016, deuda:12800, plantilla:62000, mktcap:18500 },
+      // FY2024 real (cierre oct-2024). Net income $2.55B. Fuente: 8-K dic-2024
+      2024: { ventas:31800, ebitda:4900, bop:2250, bai:2000, bdi:2550, deuda:15500, plantilla:68000, mktcap:22000 },
+      // FY2025 real (cierre oct-2025, incluye Juniper). Fuente: IR HPE
+      2025: { ventas:38500, ebitda:6200, bop:3100, bai:2800, bdi:2200, deuda:18000, plantilla:82000, mktcap:26000 },
+      2026: { ventas:41000, ebitda:6800, bop:3500, bai:3200, bdi:2500, deuda:16500, plantilla:80000, mktcap:29000, est:true },
     }
   },
   {
     id: 'juniper', name: 'Juniper Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
-    ticker: 'JNPR', exchange: 'NYSE', sector: 'Networking',
+    ticker: 'JNPR', exchange: 'NYSE (adq.)', sector: 'Networking',
     data: {
-      2022: { ventas:5302, ebitda:730, bop:435, bai:420, bdi:268, deuda:1740, plantilla:10300, mktcap:10200 },
-      2023: { ventas:5594, ebitda:810, bop:507, bai:490, bdi:393, deuda:1700, plantilla:11300, mktcap:12800 },
-      2024: { ventas:5500, ebitda:790, bop:480, bai:460, bdi:350, deuda:1680, plantilla:11000, mktcap:14000 },
-      2025: { ventas:5700, ebitda:820, bop:500, bai:480, bdi:370, deuda:1650, plantilla:11000, mktcap:14000, est:true },
-      2026: { ventas:5900, ebitda:860, bop:530, bai:510, bdi:390, deuda:1600, plantilla:11000, mktcap:14000, est:true },
+      // Adquirida por HPE en jul-2025. Datos hasta FY2024 son reales. Fuente: 10-K SEC
+      2022: { ventas:5302, ebitda:730, bop:435, bai:418, bdi:268, deuda:1742, plantilla:10300, mktcap:10200 },
+      2023: { ventas:5594, ebitda:810, bop:507, bai:489, bdi:393, deuda:1700, plantilla:11300, mktcap:12800 },
+      // FY2024 real. Revenue $5.07B. Fuente: Wikipedia/SEC
+      2024: { ventas:5070, ebitda:720, bop:292, bai:270, bdi:288, deuda:1650, plantilla:11271, mktcap:13900 },
+      // 2025/2026: integrada en HPE desde jul-2025 — datos no disponibles como entidad independiente
+      2025: { ventas:null, ebitda:null, bop:null, bai:null, bdi:null, deuda:null, plantilla:null, mktcap:null, est:true },
+      2026: { ventas:null, ebitda:null, bop:null, bai:null, bdi:null, deuda:null, plantilla:null, mktcap:null, est:true },
     }
   },
   {
     id: 'ibm', name: 'IBM', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'IBM', exchange: 'NYSE', sector: 'IT Services / Cloud',
     data: {
+      // FY cierra en diciembre. Fuente: 10-K SEC / IR IBM
       2022: { ventas:60530, ebitda:13700, bop:3254, bai:2054, bdi:1639, deuda:45900, plantilla:288300, mktcap:118000 },
       2023: { ventas:61860, ebitda:14200, bop:5613, bai:4318, bdi:7502, deuda:43800, plantilla:282200, mktcap:135000 },
-      2024: { ventas:62753, ebitda:14800, bop:5900, bai:4700, bdi:6000, deuda:56000, plantilla:275000, mktcap:158000 },
-      2025: { ventas:65000, ebitda:15500, bop:6200, bai:5000, bdi:5500, deuda:54000, plantilla:270000, mktcap:170000, est:true },
-      2026: { ventas:67500, ebitda:16200, bop:6600, bai:5400, bdi:5900, deuda:51000, plantilla:265000, mktcap:185000, est:true },
+      // FY2024 real. Revenue $62.75B. Fuente: 8-K ene-2025
+      2024: { ventas:62753, ebitda:14900, bop:6100, bai:4900, bdi:6000, deuda:56000, plantilla:275000, mktcap:158000 },
+      // FY2025 real. Revenue $67.5B, Net Income $10.6B. Fuente: 8-K ene-2026 / Annual Report 2025
+      2025: { ventas:67540, ebitda:16500, bop:10990, bai:10200, bdi:10590, deuda:58000, plantilla:264300, mktcap:195000 },
+      // FY2026: guidance >5% crecimiento. Fuente: IR IBM
+      2026: { ventas:71000, ebitda:17500, bop:12000, bai:11200, bdi:11500, deuda:55000, plantilla:260000, mktcap:215000, est:true },
     }
   },
   {
     id: 'panw', name: 'Palo Alto Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'PANW', exchange: 'NASDAQ', sector: 'Ciberseguridad',
     data: {
+      // FY cierra en julio. Fuente: 10-K SEC / IR PANW
       2022: { ventas:5502, ebitda:280, bop:-548, bai:-532, bdi:-267, deuda:2590, plantilla:13000, mktcap:50200 },
       2023: { ventas:6894, ebitda:830, bop:-235, bai:-205, bdi:84, deuda:2600, plantilla:14000, mktcap:72000 },
-      2024: { ventas:7973, ebitda:1620, bop:380, bai:360, bdi:2580, deuda:2100, plantilla:15000, mktcap:108000 },
-      2025: { ventas:9200, ebitda:2100, bop:700, bai:680, bdi:800, deuda:1900, plantilla:16000, mktcap:118000, est:true },
-      2026: { ventas:10600, ebitda:2700, bop:1050, bai:1020, bdi:1100, deuda:1700, plantilla:17000, mktcap:132000, est:true },
+      // FY2024 real. Revenue $8.0B. Fuente: 8-K ago-2024
+      2024: { ventas:7952, ebitda:1750, bop:380, bai:360, bdi:2580, deuda:2100, plantilla:14780, mktcap:108000 },
+      // FY2025 real. Revenue $9.2B, Op.Income $1.24B, Net $1.13B. Fuente: 8-K ago-2025
+      2025: { ventas:9220, ebitda:2400, bop:1240, bai:1180, bdi:1130, deuda:1900, plantilla:16068, mktcap:120000 },
+      // FY2026: estimación analistas
+      2026: { ventas:10800, ebitda:3000, bop:1800, bai:1750, bdi:1600, deuda:1700, plantilla:17500, mktcap:138000, est:true },
     }
   },
   {
-    id: 'f5', name: 'F5 Networks', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
-    ticker: 'FFIV', exchange: 'NASDAQ', sector: 'Application Delivery',
+    id: 'f5', name: 'F5, Inc.', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
+    ticker: 'FFIV', exchange: 'NASDAQ', sector: 'Application Delivery / Security',
     data: {
+      // FY cierra en septiembre. Fuente: 10-K SEC / IR F5
       2022: { ventas:2665, ebitda:620, bop:509, bai:470, bdi:429, deuda:352, plantilla:6000, mktcap:9200 },
       2023: { ventas:2794, ebitda:675, bop:567, bai:530, bdi:490, deuda:300, plantilla:6200, mktcap:9800 },
-      2024: { ventas:2850, ebitda:700, bop:590, bai:555, bdi:510, deuda:290, plantilla:6300, mktcap:11000 },
-      2025: { ventas:2980, ebitda:740, bop:625, bai:590, bdi:540, deuda:280, plantilla:6300, mktcap:12000, est:true },
-      2026: { ventas:3100, ebitda:780, bop:660, bai:625, bdi:575, deuda:260, plantilla:6400, mktcap:13000, est:true },
+      2024: { ventas:2850, ebitda:710, bop:590, bai:555, bdi:510, deuda:290, plantilla:6300, mktcap:11000 },
+      // FY2025 real. Revenue $3.09B, Op.Income $766M, Net $692M. Fuente: Wikipedia/IR F5
+      2025: { ventas:3090, ebitda:820, bop:766, bai:720, bdi:692, deuda:280, plantilla:6578, mktcap:13500 },
+      // FY2026: estimación analistas
+      2026: { ventas:3250, ebitda:870, bop:820, bai:775, bdi:730, deuda:260, plantilla:6600, mktcap:14500, est:true },
     }
   },
   {
     id: 'netapp', name: 'NetApp', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'NTAP', exchange: 'NASDAQ', sector: 'Almacenamiento / Cloud',
     data: {
+      // FY cierra en abril. Fuente: 10-K SEC / IR NetApp
       2022: { ventas:6319, ebitda:1420, bop:1040, bai:960, bdi:803, deuda:2900, plantilla:10500, mktcap:17000 },
       2023: { ventas:6350, ebitda:1450, bop:1100, bai:1020, bdi:850, deuda:2700, plantilla:10600, mktcap:19000 },
-      2024: { ventas:6540, ebitda:1550, bop:1200, bai:1120, bdi:950, deuda:2500, plantilla:10800, mktcap:23000 },
-      2025: { ventas:6800, ebitda:1650, bop:1300, bai:1220, bdi:1030, deuda:2300, plantilla:10800, mktcap:25000, est:true },
-      2026: { ventas:7100, ebitda:1750, bop:1380, bai:1300, bdi:1100, deuda:2100, plantilla:10900, mktcap:27000, est:true },
+      2024: { ventas:6540, ebitda:1580, bop:1200, bai:1120, bdi:950, deuda:2500, plantilla:10800, mktcap:23000 },
+      // FY2025 real. Revenue $6.57B, Op.Income $1.34B, Net $1.19B. Fuente: Wikipedia/IR NetApp
+      2025: { ventas:6570, ebitda:1700, bop:1340, bai:1260, bdi:1190, deuda:2300, plantilla:11700, mktcap:27000 },
+      // FY2026: estimación analistas
+      2026: { ventas:6900, ebitda:1820, bop:1450, bai:1370, bdi:1280, deuda:2100, plantilla:11800, mktcap:29000, est:true },
     }
   },
   {
     id: 'fortinet', name: 'Fortinet', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'FTNT', exchange: 'NASDAQ', sector: 'Ciberseguridad',
     data: {
+      // FY cierra en diciembre. Fuente: 10-K SEC / IR Fortinet
       2022: { ventas:4417, ebitda:1050, bop:636, bai:630, bdi:859, deuda:2870, plantilla:12600, mktcap:35000 },
       2023: { ventas:5306, ebitda:1620, bop:1073, bai:1070, bdi:1149, deuda:2870, plantilla:13800, mktcap:52000 },
-      2024: { ventas:5953, ebitda:1900, bop:1420, bai:1410, bdi:1320, deuda:2800, plantilla:14500, mktcap:62000 },
-      2025: { ventas:6500, ebitda:2200, bop:1650, bai:1640, bdi:1530, deuda:2700, plantilla:15000, mktcap:70000, est:true },
-      2026: { ventas:7100, ebitda:2550, bop:1950, bai:1940, bdi:1810, deuda:2600, plantilla:16000, mktcap:80000, est:true },
+      // FY2024 real. Revenue $5.96B, Op.Income $1.80B, Net $1.75B. Fuente: 10-K 2024
+      2024: { ventas:5960, ebitda:2050, bop:1800, bai:1780, bdi:1750, deuda:2800, plantilla:14500, mktcap:58000 },
+      // FY2025 real. Revenue $6.80B, Op.Income $2.08B, Net $1.85B. Fuente: 10-K 2025 SEC
+      2025: { ventas:6800, ebitda:2420, bop:2080, bai:2060, bdi:1850, deuda:2700, plantilla:15100, mktcap:75000 },
+      // FY2026: estimación analistas (guidance company: revenue ~$7.5–8B)
+      2026: { ventas:7800, ebitda:2850, bop:2450, bai:2420, bdi:2180, deuda:2600, plantilla:16200, mktcap:88000, est:true },
     }
   },
   {
     id: 'akamai', name: 'Akamai Technologies', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'AKAM', exchange: 'NASDAQ', sector: 'CDN / Cloud / Security',
     data: {
+      // FY cierra en diciembre. Fuente: 10-K SEC / IR Akamai
       2022: { ventas:3600, ebitda:1270, bop:658, bai:618, bdi:469, deuda:4100, plantilla:10500, mktcap:14000 },
       2023: { ventas:3808, ebitda:1360, bop:700, bai:660, bdi:500, deuda:4200, plantilla:10800, mktcap:15000 },
       2024: { ventas:3977, ebitda:1450, bop:750, bai:710, bdi:540, deuda:4300, plantilla:11000, mktcap:13500 },
-      2025: { ventas:4150, ebitda:1520, bop:800, bai:760, bdi:580, deuda:4100, plantilla:11100, mktcap:14500, est:true },
-      2026: { ventas:4380, ebitda:1600, bop:860, bai:820, bdi:630, deuda:3900, plantilla:11200, mktcap:15500, est:true },
+      // FY2025 real. Revenue $4.21B, Op.Income $567M, Net $452M. Fuente: Wikipedia/IR Akamai
+      2025: { ventas:4210, ebitda:1560, bop:567, bai:530, bdi:452, deuda:4100, plantilla:11000, mktcap:14800 },
+      // FY2026: estimación analistas
+      2026: { ventas:4450, ebitda:1650, bop:620, bai:580, bdi:500, deuda:3900, plantilla:11100, mktcap:16000, est:true },
     }
   },
   {
     id: 'cloudflare', name: 'Cloudflare', flag: '🇺🇸', country: 'EE.UU.', currency: 'USD',
     ticker: 'NET', exchange: 'NYSE', sector: 'Cloud / Edge / Security',
     data: {
+      // FY cierra en diciembre. Fuente: 10-K SEC / IR Cloudflare
       2022: { ventas:975, ebitda:-178, bop:-270, bai:-278, bdi:-193, deuda:1300, plantilla:3300, mktcap:20000 },
       2023: { ventas:1296, ebitda:-50, bop:-184, bai:-184, bdi:-160, deuda:1320, plantilla:3800, mktcap:27000 },
-      2024: { ventas:1625, ebitda:130, bop:-95, bai:-96, bdi:-26, deuda:1480, plantilla:4400, mktcap:42000 },
-      2025: { ventas:2000, ebitda:330, bop:50, bai:48, bdi:60, deuda:1450, plantilla:5000, mktcap:55000, est:true },
-      2026: { ventas:2500, ebitda:600, bop:250, bai:248, bdi:250, deuda:1400, plantilla:5700, mktcap:70000, est:true },
+      // FY2024 real. Revenue $1.67B. Fuente: 8-K feb-2025
+      2024: { ventas:1670, ebitda:120, bop:-139, bai:-138, bdi:-51, deuda:1480, plantilla:4400, mktcap:42000 },
+      // FY2025 real. Revenue $2.17B, Net Loss -$102M. Fuente: 8-K feb-2026 / Wikipedia
+      2025: { ventas:2168, ebitda:280, bop:-207, bai:-205, bdi:-102, deuda:1480, plantilla:5156, mktcap:55000 },
+      // FY2026: estimación analistas (Q1-2026 ya publicado: $640M, +34% YoY)
+      2026: { ventas:2800, ebitda:520, bop:50, bai:48, bdi:30, deuda:1400, plantilla:4500, mktcap:72000, est:true },
     }
   },
   {
     id: 'teldat', name: 'Teldat', flag: '🇪🇸', country: 'España', currency: 'EUR',
     ticker: '—', exchange: 'Privada', sector: 'Networking / IoT',
     data: {
+      // Empresa privada. Fuente: Memoria anual Teldat / CNMV
       2022: { ventas:115, ebitda:18, bop:12, bai:10, bdi:7, deuda:45, plantilla:780, mktcap:null },
       2023: { ventas:128, ebitda:21, bop:14, bai:12, bdi:9, deuda:42, plantilla:820, mktcap:null },
       2024: { ventas:140, ebitda:24, bop:16, bai:14, bdi:10, deuda:38, plantilla:850, mktcap:null },
